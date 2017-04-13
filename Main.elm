@@ -7,8 +7,15 @@ type Tree
 
 getMindMap : Tree
 getMindMap =
-    Node "Root node" [ Node "Child node 1" []
-                     , Node "Child node 2" []
+    Node "Root node" [ Node "Child node 1"  [ Node "Child node 1.1" [ Node "Child node 1.1.1" []
+                                                                    , Node "Child node 1.1.2" []
+                                                                    ]
+                                            , Node "Child node 1.2" []
+                                            , Node "Child node 1.3" []
+                                            ]
+                     , Node "Child node 2"  [ Node "Child node 2.1" []
+                                            , Node "Child node 2.2" []
+                                            ]
                      ]
 
 showTree : Tree -> Html msg
@@ -17,7 +24,13 @@ showTree tree =
         Empty
             -> text ""
         Node str childTree
-            -> text str :: List.map showTree childTree |> div []
+            -> table []
+            [
+                tr []
+                [ td [] [ text str ]
+                , List.map showTree childTree |> td []
+                ]
+            ]
 
 main =
     div []
