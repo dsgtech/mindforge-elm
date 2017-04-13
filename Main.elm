@@ -1,4 +1,5 @@
 import Html exposing (..)
+import Html.Attributes exposing (style)
 
 type Tree
     = Empty
@@ -24,11 +25,11 @@ showTree tree =
         Empty
             -> text ""
         Node str childTree
-            -> table []
+            -> table [ style [("border-collapse", "true")] ]
             [
                 tr []
-                [ td [] [ text str ]
-                , List.map showTree childTree |> td []
+                [ td [ style [("padding", "10px")] ] [ text str ]
+                , List.map showTree childTree |> td [ style [("padding", "10px")] ]
                 ]
             ]
 
