@@ -1,27 +1,58 @@
 import Html exposing (..)
 import Html.Attributes exposing (style)
-import Json.Decode exposing (..)
+import Html.Events exposing (onClick)
+import Http
+import Json.Decode as JD
 
+main =
+    Html.program
+        { init = init
+        , update = update
+        , view = view
+        , subscriptions = subscriptions
+        }
 
-json = """
-[
-    {"id": 0, "text": "Root node", "parent": 0},
-    {"id": 1, "text": "Child node 1", "parent": 0},
-    {"id": 2, "text": "Child node 2", "parent": 0},
-    {"id": 3, "text": "Child node 1.1", "parent": 1},
-    {"id": 4, "text": "Child node 1.2", "parent": 1},
-    {"id": 5, "text": "Child node 1.3", "parent": 1},
-    {"id": 6, "text": "Child node 2.1", "parent": 2},
-    {"id": 7, "text": "Child node 2.2", "parent": 2}
-]
-"""
+-- MODEL
 
 type alias JsonNode = { id: Int, text: String, parent: Int }
-
 
 type Tree
     = Empty
     | Node Int String (List Tree)
+
+type alias Model = Tree
+
+init : (Model, Cmd Msg)
+init =
+    (Empty, getJson)
+
+-- UPDATE
+
+type Msg
+    = Refresh
+    | JsonReceived (Result Http.Error (List JsonNode))
+
+update : Msg -> Model -> (Model, Cmd Msg)
+update msg model =
+    case msg of
+        Refresh ->
+            (model, getJson)
+        JsonReceived (Ok jsonNodes) ->
+            (jsonNodes |> getTree, Cmd.none)
+        JsonReceived (Err _) -> -- TODO: Handle error properly.
+            (model, Cmd.none)
+
+
+-- VIEW
+view : Model -> Html Msg
+view model =
+    div []
+    [ h1 [] [ text "MindForge" ]
+    , button [onClick Refresh] [text "Refresh"]
+    , showTree model
+    ]
+
+-- HELPERS
 
 insert : JsonNode -> Tree -> Tree
 insert ({id, text, parent} as node) tree =
@@ -35,16 +66,21 @@ insert ({id, text, parent} as node) tree =
                 Node pid ptext (List.map (insert node) children)
 
 
-jsonNodeDecoder : Decoder JsonNode
+jsonNodeDecoder : JD.Decoder JsonNode
 jsonNodeDecoder =
-    map3 JsonNode (field "id" int) (field "text" string) (field "parent" int)
+    JD.map3
+        JsonNode
+        (JD.field "id" JD.int)
+        (JD.field "text" JD.string)
+        (JD.field "parent" JD.int)
 
-getDecodedJsonNodes jsonStr =
-    decodeString (list jsonNodeDecoder) jsonStr
+jsonNodesDecoder : JD.Decoder (List JsonNode)
+jsonNodesDecoder =
+    JD.list jsonNodeDecoder
 
 
-getTreeFromDecodedJson : List JsonNode -> Tree
-getTreeFromDecodedJson jsonNodes =
+getTree : List JsonNode -> Tree
+getTree jsonNodes =
     List.foldl insert Empty jsonNodes
 
 
@@ -58,20 +94,16 @@ showTree tree =
             [
                 tr []
                 [ td [ style [("padding", "10px")] ] [ text str ]
-                , List.map showTree childTree |> td [ style [("padding", "10px")] ]
+                , List.map showTree childTree |>
+                    td [ style [("padding", "10px")] ]
                 ]
             ]
 
-main =
-    let
-        result =
-            case getDecodedJsonNodes json of
-                Ok(decodedJsonNodes) ->
-                    decodedJsonNodes |> getTreeFromDecodedJson |> showTree
-                Err(err) ->
-                    div [] [text "Error: ", text err]
-    in
-        div []
-        [ h1 [] [ text "MindForge" ]
-        , result
-        ]
+getJson : Cmd Msg
+getJson =
+    Http.send JsonReceived (Http.get "test0.json" jsonNodesDecoder)
+
+-- SUBSCRIPTIONS
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.none
