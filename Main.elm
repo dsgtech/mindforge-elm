@@ -31,6 +31,8 @@ init =
 type Msg
     = Refresh
     | JsonReceived (Result Http.Error (List JsonNode))
+    | RebuildSource
+    | RebuildSourceAck (Result Http.Error Int)
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -41,6 +43,10 @@ update msg model =
             (jsonNodes |> getTree, Cmd.none)
         JsonReceived (Err _) -> -- TODO: Handle error properly.
             (model, Cmd.none)
+        RebuildSource ->
+            (model, rebuildSource)
+        RebuildSourceAck (_) -> -- TODO: Handle error properly.
+            (model, Cmd.none)
 
 
 -- VIEW
@@ -48,6 +54,7 @@ view : Model -> Html Msg
 view model =
     div []
     [ h1 [] [ text "MindForge" ]
+    , button [onClick RebuildSource] [text "Rebuild Elm source"]
     , button [onClick Refresh] [text "Refresh"]
     , showTree model
     ]
@@ -102,6 +109,10 @@ showTree tree =
 getJson : Cmd Msg
 getJson =
     Http.send JsonReceived (Http.get "test0.json" jsonNodesDecoder)
+
+rebuildSource : Cmd Msg
+rebuildSource =
+    Http.send RebuildSourceAck (Http.get "rebuild_source" (JD.succeed 0))
 
 -- SUBSCRIPTIONS
 subscriptions : Model -> Sub Msg

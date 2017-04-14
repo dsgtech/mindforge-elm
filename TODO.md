@@ -4,6 +4,7 @@
 * Use HTTP to get JSON.
 
 ## Backlog
+* Show error message in webpage when compilation fails.
 
 ### Functionality
 * Use elm-css for styling.
