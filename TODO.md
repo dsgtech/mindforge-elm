@@ -1,7 +1,7 @@
 # To do
 
 ## Active
-* Use HTTP to get JSON.
+
 
 ## Backlog
 * Show error message in webpage when compilation fails.
@@ -17,5 +17,6 @@ efficiently.
 
 # Done
 * Load tree from JSON.
+* Use HTTP to get JSON.
 
 # Cancelled
