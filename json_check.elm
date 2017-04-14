@@ -21,7 +21,7 @@ jsonNodeDecoder : Decoder JsonNode
 jsonNodeDecoder =
     map3 JsonNode (field "id" int) (field "text" string) (field "parent" int)
 
-getJsonNodeList jsonStr =
+getDecodedJsonNodes jsonStr =
     decodeString (list jsonNodeDecoder) jsonStr
 
 
@@ -37,8 +37,9 @@ showJsonNode {id, text, parent} =
             , Html.text (toString parent)
             ]
 
+
 main =
-     case getJsonNodeList json of
+     case getDecodedJsonNodes json of
          Ok(jsonNodes) ->
              List.map showJsonNode jsonNodes |> div []
          Err(err) ->
