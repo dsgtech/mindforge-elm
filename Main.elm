@@ -30,7 +30,7 @@ insert ({id, text, parent} as node) tree =
             Node id text []
         Node pid ptext children ->
             if parent == pid then
-                Node pid ptext (List.append [Node id text []] children)
+                Node pid ptext (List.append children [Node id text []])
             else
                 Node pid ptext (List.map (insert node) children)
 
