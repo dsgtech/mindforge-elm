@@ -1,6 +1,10 @@
-from flask import Flask, redirect, url_for
-app = Flask(__name__)
+from flask import Flask, send_from_directory
+app = Flask(__name__, static_url_path="")
 
 @app.route('/')
-def hello_world():
-    return redirect(url_for('static', filename='index.html'))
+def main_page():
+    return send_from_directory("static", "index.html")
+
+@app.route('/<path:path>')
+def serve_page(path):
+    return send_from_directory("static", path)

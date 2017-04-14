@@ -1,0 +1,7 @@
+#!/bin/bash
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+elm-make "$DIR/Main.elm" --output="$DIR/static/main.js" || exit 1
+
+env FLASK_APP="$DIR/flask-server.py" flask run #--host=0.0.0.0
