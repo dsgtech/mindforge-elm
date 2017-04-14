@@ -1,0 +1,8 @@
+[
+    {"id": 0, "text": "Root node", "parent": 0},
+    {"id": 1, "text": "Child node 1", "parent": 0},
+    {"id": 2, "text": "Child node 2", "parent": 0},
+    {"id": 3, "text": "Child node 1.1", "parent": 1},
+    {"id": 4, "text": "Child node 2.1", "parent": 2},
+    {"id": 5, "text": "Child node 2.2", "parent": 2}
+]

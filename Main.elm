@@ -1,6 +1,6 @@
 import Html exposing (..)
-import Html.Attributes exposing (style)
-import Html.Events exposing (onClick)
+import Html.Attributes exposing (style, type_, placeholder)
+import Html.Events exposing (onClick, onInput)
 import Http
 import Json.Decode as JD
 
@@ -20,11 +20,14 @@ type Tree
     = Empty
     | Node Int String (List Tree)
 
-type alias Model = Tree
+type alias Model =
+    { tree : Tree
+    , fileName : String
+    }
 
 init : (Model, Cmd Msg)
 init =
-    (Empty, getJson)
+    (Model Empty "test0.json", getJson "test0.json")
 
 -- UPDATE
 
@@ -33,21 +36,23 @@ type Msg
     | JsonReceived (Result Http.Error (List JsonNode))
     | RebuildSource
     | RebuildSourceAck (Result Http.Error Int)
+    | MindMapFileName String
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
         Refresh ->
-            (model, getJson)
+            (model, getJson model.fileName)
         JsonReceived (Ok jsonNodes) ->
-            (jsonNodes |> getTree, Cmd.none)
+            ({ model | tree = jsonNodes |> getTree }, Cmd.none)
         JsonReceived (Err _) -> -- TODO: Handle error properly.
             (model, Cmd.none)
         RebuildSource ->
             (model, rebuildSource)
         RebuildSourceAck (_) -> -- TODO: Handle error properly.
             (model, Cmd.none)
-
+        MindMapFileName name ->
+            ({ model | fileName = name }, Cmd.none)
 
 -- VIEW
 view : Model -> Html Msg
@@ -55,8 +60,11 @@ view model =
     div []
     [ h1 [] [ text "MindForge" ]
     , button [onClick RebuildSource] [text "Rebuild Elm source"]
-    , button [onClick Refresh] [text "Refresh"]
-    , showTree model
+    , input [ type_ "text"
+            , placeholder "mind map file"
+            , onInput MindMapFileName] []
+    , button [onClick Refresh] [text "Load"]
+    , showTree model.tree
     ]
 
 -- HELPERS
@@ -106,9 +114,9 @@ showTree tree =
                 ]
             ]
 
-getJson : Cmd Msg
-getJson =
-    Http.send JsonReceived (Http.get "test0.json" jsonNodesDecoder)
+getJson : String -> Cmd Msg
+getJson fileName =
+    Http.send JsonReceived (Http.get fileName jsonNodesDecoder)
 
 rebuildSource : Cmd Msg
 rebuildSource =
