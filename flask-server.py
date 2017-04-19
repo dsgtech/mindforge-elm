@@ -17,9 +17,8 @@ def rebuild_source():
 @app.route('/list_files')
 def list_files():
     files = [f for f in os.listdir('static') if f.endswith('.json')]
-    j = jsonify(files)
-    print(j.get_data().decode())
-    return j
+    #print(jsonify(files).get_data().decode())
+    return jsonify(files)
 
 @app.route('/<path:path>')
 def serve_page(path):
