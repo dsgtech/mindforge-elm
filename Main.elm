@@ -67,6 +67,21 @@ view model =
     , showTree model.tree
     ]
 
+showTree : Tree -> Html msg
+showTree tree =
+    case tree of
+        Empty
+            -> text ""
+        Node _ str childTree
+            -> table [ style [("border-collapse", "true")] ]
+            [
+                tr []
+                [ td [ style [("padding", "10px")] ] [ text str ]
+                , List.map showTree childTree |>
+                    td [ style [("padding", "10px")] ]
+                ]
+            ]
+
 -- HELPERS
 
 insert : JsonNode -> Tree -> Tree
@@ -98,21 +113,6 @@ getTree : List JsonNode -> Tree
 getTree jsonNodes =
     List.foldl insert Empty jsonNodes
 
-
-showTree : Tree -> Html msg
-showTree tree =
-    case tree of
-        Empty
-            -> text ""
-        Node _ str childTree
-            -> table [ style [("border-collapse", "true")] ]
-            [
-                tr []
-                [ td [ style [("padding", "10px")] ] [ text str ]
-                , List.map showTree childTree |>
-                    td [ style [("padding", "10px")] ]
-                ]
-            ]
 
 getJson : String -> Cmd Msg
 getJson fileName =
