@@ -72,9 +72,9 @@ view model =
     , showTree model.tree
     ]
 
-viewOption : a -> Html msg
+viewOption : String -> Html msg
 viewOption val =
-    option [ value (toString val) ] [ text (toString val) ]
+    option [ value (val) ] [ text (val) ]
 
 showTree : Tree -> Html msg
 showTree tree =
